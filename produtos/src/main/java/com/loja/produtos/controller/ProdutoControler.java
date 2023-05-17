@@ -5,6 +5,7 @@ import com.loja.produtos.service.ProdutoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/")
@@ -21,8 +22,8 @@ public class ProdutoControler {
 
     @PostMapping
     public ResponseEntity<Produto> Cadastrar(@RequestBody Produto produto) {
-        Produto cadastrarProduto = produtoService.criar(produto);
-        return ResponseEntity.ok(cadastrarProduto);
+        Produto cadastraProduto = produtoService.cadastra(produto);
+        return ResponseEntity.ok(cadastraProduto);  
     }
 
     @PutMapping

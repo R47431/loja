@@ -1,7 +1,8 @@
 
 export class Produto{
-  id:Number = 0;
+  id:number = 0;
   nome:string = ""
-  preco:Number = 0;
-  descricao:string = ""
+  preco:number = 0;
+  descricao:string = "";
+  caminhoImagem: string = "";
 }

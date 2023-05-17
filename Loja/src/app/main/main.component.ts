@@ -9,7 +9,11 @@ import { Produto } from '../model/Produto';
 })
 export class MainComponent {
 
+  produto = new Produto();
   produtos:Produto[] = [];
+  pesquisa: string = "";
+  produtoEncontrado: Produto | undefined;
+
 
   constructor(private service: ProdutosService) {}
 
@@ -21,4 +25,44 @@ export class MainComponent {
     this.service.lista()
     .subscribe(data => this.produtos = data);
   }
+
+  cadastrar(): void {
+    this.service.cadastrar(this.produto)
+    .subscribe(data => {
+      this.produtos.push(data);
+      this.limpaFormulario;
+      alert("Cadastrar");
+    })
+  }
+
+  altera(): void {
+    this.service.altera(this.produto)
+    .subscribe(data => {
+      let indice = this.produtos.findIndex(data => data.id === this.produto.id)
+      this.produtos[indice] = data;
+      this.limpaFormulario;
+      alert("Alterado");
+    })
+  }
+
+  deleta(): void {
+    this.service.deleta(this.produto.id)
+    .subscribe(() => {
+      let indice = this.produtos.findIndex(data => data.id === this.produto.id)
+      this.produtos.splice(indice,1);
+      this.limpaFormulario;
+      alert("Deleta");
+    })
+  }
+
+  buscarProduto(): void {
+    this.produtoEncontrado = this.produtos.find(produto =>
+      produto.nome && produto.nome.toLowerCase().includes(this.pesquisa.toLowerCase())
+    );
+  }
+
+  limpaFormulario(): void {
+    this.produto = new Produto();
+  }
+
 }
