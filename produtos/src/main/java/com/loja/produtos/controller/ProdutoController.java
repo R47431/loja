@@ -31,29 +31,20 @@ public class ProdutoController {
     }
 
     @PostMapping
-    public ResponseEntity<Produto> cadastrar(@ModelAttribute Produto produto, @RequestParam("imagem") MultipartFile imagem) {
+    public ResponseEntity<Produto> cadastrar(@ModelAttribute Produto produto, MultipartFile imagem) {
         try {
             if (!imagem.isEmpty()) {
                 Long ultimoId = produtoRepositorio.obterUltimoId();
+                Long nomeId = ultimoId != null ? ultimoId + 1 : 1;
+                String nomeArquivo = nomeId + ".jpg";
 
-                // Incrementa o ID para gerar o próximo nome de arquivo
-                Long nomeArquiv = ultimoId != null ? ultimoId + 1 : 1;
-
-                // Criar um nome único para o arquivo de imagem
-                String nomeArquivo = nomeArquiv +  ".jpg";
-
-                // Construir o caminho completo para salvar o arquivo
                 String diretorioUpload = "C:\\Users\\Joaor\\OneDrive\\Área de Trabalho\\UmNovoComeço\\Loja\\src\\assets\\imagem";
                 String caminhoCompleto = diretorioUpload + File.separator + nomeArquivo;
 
-                // Salvar a imagem no diretório
                 Files.copy(imagem.getInputStream(), Paths.get(caminhoCompleto), StandardCopyOption.REPLACE_EXISTING);
 
-                // Armazenar apenas o nome do arquivo no objeto Produto
                 produto.setNomeImagem(nomeArquivo);
             }
-
-            // Salvar o produto no banco de dados
             Produto produtoCadastrado = produtoRepositorio.save(produto);
             return ResponseEntity.ok(produtoCadastrado);
         } catch (IOException e) {
@@ -70,9 +61,21 @@ public class ProdutoController {
 
     @DeleteMapping(path = "/{id}")
     public Produto deleta(@PathVariable Long id) {
-        Produto produto = produtoRepositorio.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado com o ID: " + id));
+        Produto produto = produtoRepositorio.findById(id).orElseThrow(() -> new IllegalArgumentException("Produto não encontrado com o ID: " + id));
 
+        // Obter o nome do arquivo de imagem
+        String nomeImagem = produto.getNomeImagem();
+
+        // Excluir o arquivo do diretório, se existir
+        if (nomeImagem != null && !nomeImagem.isEmpty()) {
+            String diretorioUpload = "C:\\Users\\Joaor\\OneDrive\\Área de Trabalho\\UmNovoComeço\\Loja\\src\\assets\\imagem";
+            String caminhoCompleto = diretorioUpload + File.separator + nomeImagem;
+
+            File arquivoImagem = new File(caminhoCompleto);
+            if (arquivoImagem.exists()) {
+                arquivoImagem.delete();
+            }
+        }
         produtoRepositorio.deleteById(id);
         return produto;
     }
