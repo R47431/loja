@@ -61,12 +61,11 @@ public class ProdutoController {
 
     @DeleteMapping(path = "/{id}")
     public Produto deleta(@PathVariable Long id) {
-        Produto produto = produtoRepositorio.findById(id).orElseThrow(() -> new IllegalArgumentException("Produto não encontrado com o ID: " + id));
+        Produto produto = produtoRepositorio.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado com o ID: " + id));
 
-        // Obter o nome do arquivo de imagem
         String nomeImagem = produto.getNomeImagem();
 
-        // Excluir o arquivo do diretório, se existir
         if (nomeImagem != null && !nomeImagem.isEmpty()) {
             String diretorioUpload = "C:\\Users\\Joaor\\OneDrive\\Área de Trabalho\\UmNovoComeço\\Loja\\src\\assets\\imagem";
             String caminhoCompleto = diretorioUpload + File.separator + nomeImagem;
@@ -81,7 +80,8 @@ public class ProdutoController {
     }
 
     @GetMapping(path = "/{id}")
-    public Optional<Produto> buscaProduto(@PathVariable Long id) {
-        return produtoRepositorio.findById(id);
+    public Produto buscaProduto(@PathVariable Long id) {
+        return produtoRepositorio.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado com o ID: " + id));
     }
 }
