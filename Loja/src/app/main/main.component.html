@@ -1,0 +1,30 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+
+</head>
+<body>
+  <form (ngSubmit)="buscaProduto()">
+    <input type="text" [(ngModel)]="pesquisa" name="pesquisa" placeholder="Pesquisa pelo nome">
+    <button type="submit">Buscar</button>
+
+
+  <div *ngIf="produtoEncontrado">
+    <img [src]="'assets/imagem/' + produto.nome + '.jpg'" width="300px" alt="imagem">
+      <p>Nome: {{ produtoEncontrado.nome }}</p>
+    <p>id: {{ produtoEncontrado.id }}</p>
+    <p>Preço: {{ produtoEncontrado.preco }}</p>
+    <p>Descrição: {{ produtoEncontrado.descricao }}</p>
+  </div>
+</form>
+    <div *ngFor="let produto of produtos" class="product">
+      <img [src]="'assets/imagem/' + produto.nome + '.jpg'" width="300px" alt="imagem">
+      <h3>{{ produto.nome }}</h3>
+      <p>Preço: R$ {{ produto.preco }}</p>
+      <p>Descrição: {{ produto.descricao }}</p>
+    </div>
+</body>
+</html>
+
+

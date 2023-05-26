@@ -1,0 +1,15 @@
+.product {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 20px;
+
+
+}
+
+.product h3 {
+  margin-top: 0;
+}
+
+.product p {
+  margin-bottom: 5px;
+}

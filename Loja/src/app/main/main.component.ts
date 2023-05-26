@@ -55,14 +55,19 @@ export class MainComponent {
     })
   }
 
-  buscarProduto(): void {
-    this.produtoEncontrado = this.produtos.find(produto =>
-      produto.nome && produto.nome.toLowerCase().includes(this.pesquisa.toLowerCase())
-    );
+  buscaProduto(): void {
+    this.service.buscaProduto(this.produto.nome)
+      .subscribe(data => {
+        this.produtoEncontrado = this.produtos.find(produto =>
+          produto.nome && produto.nome.toLowerCase().includes(this.pesquisa.toLowerCase())
+        );
+      });
   }
 
   limpaFormulario(): void {
     this.produto = new Produto();
   }
+
+
 
 }
