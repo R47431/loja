@@ -11,7 +11,7 @@
 
 
   <div *ngIf="produtoEncontrado">
-    <img [src]="'assets/imagem/' + produto.nome + '.jpg'" width="300px" alt="imagem">
+    <img [src]="'assets/imagem/' + produto.id + '.jpg'" width="300px" alt="imagem">
       <p>Nome: {{ produtoEncontrado.nome }}</p>
     <p>id: {{ produtoEncontrado.id }}</p>
     <p>Preço: {{ produtoEncontrado.preco }}</p>
@@ -19,7 +19,7 @@
   </div>
 </form>
     <div *ngFor="let produto of produtos" class="product">
-      <img [src]="'assets/imagem/' + produto.nome + '.jpg'" width="300px" alt="imagem">
+      <img [src]="'assets/imagem/' + produto.id + '.jpg'" width="300px" alt="imagem">
       <h3>{{ produto.nome }}</h3>
       <p>Preço: R$ {{ produto.preco }}</p>
       <p>Descrição: {{ produto.descricao }}</p>

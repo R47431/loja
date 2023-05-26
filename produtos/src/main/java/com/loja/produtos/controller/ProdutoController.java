@@ -1,5 +1,6 @@
 package com.loja.produtos.controller;
 
+import com.loja.produtos.model.ErrorResponse;
 import com.loja.produtos.model.Produto;
 import com.loja.produtos.repositorio.ProdutoRepositorio;
 
@@ -31,7 +32,7 @@ public class ProdutoController {
     }
 
     @PostMapping
-    public ResponseEntity<Produto> cadastrar(@ModelAttribute Produto produto, MultipartFile imagem) {
+    public ResponseEntity<?> cadastrar(@ModelAttribute Produto produto, MultipartFile imagem) {
         try {
             if (!imagem.isEmpty()) {
                 Long ultimoId = produtoRepositorio.obterUltimoId();
@@ -45,6 +46,11 @@ public class ProdutoController {
 
                 produto.setNomeImagem(nomeArquivo);
             }
+            Optional<Produto> produtoExistentee = produtoRepositorio.findByNome(produto.getNome());
+            if (produtoExistentee.isPresent()) {
+                ErrorResponse  errorResposta = new ErrorResponse("O nome do produto já está em uso.");
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResposta);
+            }
             Produto produtoCadastrado = produtoRepositorio.save(produto);
             return ResponseEntity.ok(produtoCadastrado);
         } catch (IOException e) {
@@ -54,16 +60,22 @@ public class ProdutoController {
 
 
     @PutMapping
-    public ResponseEntity<Produto> altera(Produto produto) {
+    public ResponseEntity<?> altera(Produto produto) {
+
+        Optional<Produto> produtoExistentee = produtoRepositorio.findByNome(produto.getNome());
+        if (produtoExistentee.isPresent()) {
+            ErrorResponse  errorResposta = new ErrorResponse("O nome do produto já está em uso.");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResposta);
+        }
         Produto alteraProduto = produtoRepositorio.save(produto);
         return ResponseEntity.ok(alteraProduto);
     }
 
     @DeleteMapping(path = "/{id}")
     public Produto deleta(@PathVariable Long id) {
+
         Produto produto = produtoRepositorio.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado com o ID: " + id));
-
         String nomeImagem = produto.getNomeImagem();
 
         if (nomeImagem != null && !nomeImagem.isEmpty()) {
@@ -79,9 +91,8 @@ public class ProdutoController {
         return produto;
     }
 
-    @GetMapping(path = "/{id}")
-    public Produto buscaProduto(@PathVariable Long id) {
-        return produtoRepositorio.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado com o ID: " + id));
+    @GetMapping(path = "/{nome}")
+    public Optional<Produto> buscaProduto(@PathVariable String nome) {
+        return produtoRepositorio.findByNome(nome);
     }
 }
