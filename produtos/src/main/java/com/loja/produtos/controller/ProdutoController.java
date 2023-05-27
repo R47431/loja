@@ -18,6 +18,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Optional;
 
+@SuppressWarnings("ALL")
 @RestController
 @RequestMapping("/")
 @CrossOrigin("*")
@@ -34,27 +35,29 @@ public class ProdutoController {
     @PostMapping
     public ResponseEntity<?> cadastrar(@ModelAttribute Produto produto, MultipartFile imagem) {
         try {
-            if (!imagem.isEmpty()) {
-                Long ultimoId = produtoRepositorio.obterUltimoId();
-                Long nomeId = ultimoId != null ? ultimoId + 1 : 1;
-                String nomeArquivo = nomeId + ".jpg";
-
-                String diretorioUpload = "C:\\Users\\Joaor\\OneDrive\\Área de Trabalho\\UmNovoComeço\\Loja\\src\\assets\\imagem";
-                String caminhoCompleto = diretorioUpload + File.separator + nomeArquivo;
-
-                Files.copy(imagem.getInputStream(), Paths.get(caminhoCompleto), StandardCopyOption.REPLACE_EXISTING);
-
-                produto.setNomeImagem(nomeArquivo);
+            if (imagem.isEmpty()) {
+                return ResponseEntity.badRequest().body("A imagem do produto é obrigatória.");
             }
-            Optional<Produto> produtoExistentee = produtoRepositorio.findByNome(produto.getNome());
-            if (produtoExistentee.isPresent()) {
-                ErrorResponse  errorResposta = new ErrorResponse("O nome do produto já está em uso.");
-                return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResposta);
+
+            Optional<Produto> produtoExistente = produtoRepositorio.findByNome(produto.getNome());
+            if (produtoExistente.isPresent()) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("O nome do produto já está em uso.");
             }
+
+            String diretorioUpload = "C:\\Users\\Joaor\\OneDrive\\Área de Trabalho\\UmNovoComeço\\Loja\\src\\assets\\imagem";
+            String nomeArquivo = produto.getNome() + ".jpg";
+            String caminhoCompleto = diretorioUpload + File.separator + nomeArquivo;
+
+            Files.copy(imagem.getInputStream(), Paths.get(caminhoCompleto), StandardCopyOption.REPLACE_EXISTING);
+
+            produto.setNomeImagem(nomeArquivo);
+
             Produto produtoCadastrado = produtoRepositorio.save(produto);
             return ResponseEntity.ok(produtoCadastrado);
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            ErrorResponse errorResponse = new ErrorResponse("Ocorreu um erro ao processar o cadastro.");
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
 
