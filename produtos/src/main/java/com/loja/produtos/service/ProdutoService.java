@@ -6,6 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @Service
 public class ProdutoService {
@@ -15,12 +19,14 @@ public class ProdutoService {
 
     String diretorio = "C:\\Users\\Joaor\\OneDrive\\Área de Trabalho\\UmNovoComeço\\Loja\\src\\assets\\imagem";
 
+
     public String diretorioComNome(Produto produto) {
         String nomeArquivo = produto.getNome() + ".jpg";
         String caminhoCompleto = diretorio + File.separator + nomeArquivo;
 
         return caminhoCompleto;
     }
+
     public String diretorioComImagem(Produto produto) {
         String nomeArquivo = produto.getNomeImagem();
         String caminhoCompleto = diretorio + File.separator + nomeArquivo;

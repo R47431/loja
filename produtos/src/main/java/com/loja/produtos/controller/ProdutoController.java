@@ -19,7 +19,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.Optional;
 
 
-@SuppressWarnings("ALL")
 @RestController
 @RequestMapping("/")
 @CrossOrigin("*")
@@ -46,11 +45,9 @@ public class ProdutoController {
             if (produtoExistente.isPresent()) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("O nome do produto já está em uso.");
             }
-
             String diretorio = produtoService.diretorioComNome(produto);
 
             Files.copy(imagem.getInputStream(), Paths.get(diretorio), StandardCopyOption.REPLACE_EXISTING);
-
             produto.setNomeImagem(produto.getNome() + ".jpg");
 
             Produto produtoCadastrado = produtoRepositorio.save(produto);
@@ -63,8 +60,8 @@ public class ProdutoController {
 
     @PutMapping
     public ResponseEntity<?> altera(Produto produto) {
-        Optional<Produto> produtoExistentee = produtoRepositorio.findByNome(produto.getNome());
-        if (produtoExistentee.isPresent()) {
+        Optional<Produto> produtoExistente = produtoRepositorio.findByNome(produto.getNome());
+        if (produtoExistente.isPresent()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("O nome do produto já está em uso.");
         }
         Produto alteraProduto = produtoRepositorio.save(produto);
@@ -73,17 +70,13 @@ public class ProdutoController {
 
     @DeleteMapping(path = "/{id}")
     public Produto deleta(@PathVariable Long id) {
-
         Produto produto = produtoRepositorio.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado com o ID: " + id));
-
         String diretorio = produtoService.diretorioComImagem(produto);
-
-            File arquivoImagem = new File(diretorio);
-            if (arquivoImagem.exists()) {
-                arquivoImagem.delete();
-            }
-
+        File arquivoImagem = new File(diretorio);
+        if (arquivoImagem.exists()) {
+            arquivoImagem.delete();
+        }
         produtoRepositorio.deleteById(id);
         return produto;
     }
