@@ -41,8 +41,8 @@ public class ProdutoController {
             if (imagem.isEmpty()) {
                 return ResponseEntity.badRequest().body("A imagem do produto é obrigatória.");
             }
-            Optional<Produto> produtoExistente = produtoRepositorio.findByNome(produto.getNome());
-            if (produtoExistente.isPresent()) {
+            Optional<Produto> nomeExistente = produtoRepositorio.findByNome(produto.getNome());
+            if (nomeExistente.isPresent()) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("O nome do produto já está em uso.");
             }
             String diretorio = produtoService.diretorioComNome(produto);
