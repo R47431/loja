@@ -28,7 +28,7 @@ export class ProdutosService {
     return this.http.delete<void>(`${this.url}/${id}`)
   }
 
-  buscaProduto(nome:string):Observable<void> {
-    return this.http.get<void>(`${this.url}/${nome}`)
+  buscaProduto(nome:string):Observable<Produto> {
+    return this.http.get<Produto>(`${this.url}/${nome}`)
   }
 }

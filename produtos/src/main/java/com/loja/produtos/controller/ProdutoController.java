@@ -59,13 +59,22 @@ public class ProdutoController {
     }
 
     @PutMapping
-    public ResponseEntity<?> altera(Produto produto) {
-        Optional<Produto> produtoExistente = produtoRepositorio.findByNome(produto.getNome());
-        if (produtoExistente.isPresent()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("O nome do produto já está em uso.");
+    public ResponseEntity<?> altera(Produto produto, MultipartFile imagem) {
+        try {
+            Optional<Produto> produtoExistente = produtoRepositorio.findByNome(produto.getNome());
+            if (produtoExistente.isPresent() && !produtoExistente.get().getId().equals(produto.getId())) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("O nome do produto já está em uso.");
+            }
+            String diretorio = produtoService.diretorioComNome(produto);
+
+            Files.copy(imagem.getInputStream(), Paths.get(diretorio), StandardCopyOption.REPLACE_EXISTING);
+            produto.setNomeImagem(produto.getNome() + ".jpg");
+
+            Produto alteraProduto = produtoRepositorio.save(produto);
+            return ResponseEntity.ok(alteraProduto);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ocorreu um erro ao processar o Alteracao.");
         }
-        Produto alteraProduto = produtoRepositorio.save(produto);
-        return ResponseEntity.ok(alteraProduto);
     }
 
     @DeleteMapping(path = "/{id}")
