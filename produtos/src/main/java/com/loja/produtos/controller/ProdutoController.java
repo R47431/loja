@@ -38,13 +38,8 @@ public class ProdutoController {
     @PostMapping
     public ResponseEntity<?> cadastrar(@ModelAttribute Produto produto, MultipartFile imagem) {
         try {
-            if (imagem.isEmpty()) {
-                return ResponseEntity.badRequest().body("A imagem do produto é obrigatória.");
-            }
-            Optional<Produto> nomeExistente = produtoRepositorio.findByNome(produto.getNome());
-            if (nomeExistente.isPresent()) {
-                return ResponseEntity.status(HttpStatus.CONFLICT).body("O nome do produto já está em uso.");
-            }
+            produtoService.validaCampo(produto,imagem);
+
             String diretorio = produtoService.diretorioComNome(produto);
 
             Files.copy(imagem.getInputStream(), Paths.get(diretorio), StandardCopyOption.REPLACE_EXISTING);
@@ -55,16 +50,17 @@ public class ProdutoController {
         } catch (IOException e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ocorreu um erro ao processar o cadastro.");
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+
         }
     }
 
     @PutMapping
     public ResponseEntity<?> altera(Produto produto, MultipartFile imagem) {
         try {
-            Optional<Produto> produtoExistente = produtoRepositorio.findByNome(produto.getNome());
-            if (produtoExistente.isPresent() && !produtoExistente.get().getId().equals(produto.getId())) {
-                return ResponseEntity.status(HttpStatus.CONFLICT).body("O nome do produto já está em uso.");
-            }
+            produtoService.validaCampo(produto,imagem);
+
             String diretorio = produtoService.diretorioComNome(produto);
 
             Files.copy(imagem.getInputStream(), Paths.get(diretorio), StandardCopyOption.REPLACE_EXISTING);
@@ -74,24 +70,85 @@ public class ProdutoController {
             return ResponseEntity.ok(alteraProduto);
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ocorreu um erro ao processar o Alteracao.");
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
     @DeleteMapping(path = "/{id}")
-    public Produto deleta(@PathVariable Long id) {
-        Produto produto = produtoRepositorio.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado com o ID: " + id));
-        String diretorio = produtoService.diretorioComImagem(produto);
-        File arquivoImagem = new File(diretorio);
-        if (arquivoImagem.exists()) {
-            arquivoImagem.delete();
+    public ResponseEntity<?> deleta(@PathVariable Long id) {
+        try {
+            Optional<Produto> findId = produtoRepositorio.findById(id);
+
+            if (findId.isPresent()) {
+                String diretorio = produtoService.diretorioComImagem(findId.get());
+
+                File arquivoImagem = new File(diretorio);
+                if (arquivoImagem.exists()) {
+                    arquivoImagem.delete();
+                }
+
+                produtoRepositorio.deleteById(id);
+
+                return ResponseEntity.ok().body("produto deletado");
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ocorreu um erro ao excluir o produto.");
         }
-        produtoRepositorio.deleteById(id);
-        return produto;
     }
 
     @GetMapping(path = "/{nome}")
-    public Optional<Produto> buscaProduto(@PathVariable String nome) {
-        return produtoRepositorio.findByNome(nome);
+    public ResponseEntity<?> buscaProduto(@PathVariable String nome) {
+        try {
+            if (nome.isEmpty()) {
+                return ResponseEntity.badRequest().body("nao pode esta vazio");
+            }
+
+            Optional<Produto> produtoEncontrado = produtoRepositorio.findByNome(nome);
+            if (produtoEncontrado.isPresent()) {
+                return ResponseEntity.ok(produtoEncontrado.get());
+            }else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ocorreu um erro ao buscar o produto.");
+        }
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+    //EM CASO DE POLUIÇÃO USE
+    @DeleteMapping("/all")
+    public void teate() {
+        try {
+            Iterable<Produto> produtos = produtoRepositorio.findAll();
+
+            for (Produto produto : produtos) {
+                String diretorio = produtoService.diretorioComImagem(produto);
+
+                File arquivoImagem = new File(diretorio);
+                if (arquivoImagem.exists()) {
+                    arquivoImagem.delete();
+                }
+            }
+
+            produtoRepositorio.deleteAll();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
