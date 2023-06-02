@@ -1,4 +1,18 @@
 .produtos{
   display: inline-block;
-  width: 50%;
+  padding: 20px;
+  margin: 10px auto;
+  border: 10px;
+}
+form{
+  width: 500px;
+  margin: 10px auto;
+}
+.produtoEncontrado{
+  display: flex;
+  margin: 10px auto;
+
+}
+.detalhes {
+
 }
